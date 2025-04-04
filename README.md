@@ -4,7 +4,9 @@ Documento que apresenta uma arquitetura de dados, baseada em GCP, para disponibi
 
 A solução foi pensada para operar em larga escala, com alto volume de dados, mas pode ser simplificada para cenários com menor carga ou complexidade.
 
-
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Bruno-Furtado/gcp-data-architecture/refs/heads/main/architecture.webp" alt="architecture">
+</p>
 
 ## 1. Envio de dados 🏌️‍♂️
 
