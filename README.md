@@ -172,8 +172,6 @@ As tabelas realizam:
 | `lastoperation` | TIMESTAMP | Última operação realizada no registro |
 | `ingestiondatetime` | TIMESTAMP | Momento em que o dado foi gravado no BigQuery |
 
-> Esta tabela é particionada por `DATE(ingestiondatetime)`, o que permite melhorar a performance de leitura e reduzir os custos nas consultas analíticas.
-
 ```sql
 config {
   type: "table",
@@ -186,12 +184,17 @@ SELECT
   id,
   MAX_BY(data.status, timestamp) AS status,
   MAX_BY(data.data_fim, timestamp) AS data_fim,
-  MAX(ingestiondatetime) AS ingestiondatetime
+  MAX(timestamp) AS lasttimestamp,
+  MAX_BY(userid, timestamp) AS lastuserid,
+  MAX_BY(operation, timestamp) AS lastoperation,
+  CURRENT_TIMESTAMP() AS ingestiondatetime
 FROM raw.viagens
 WHERE operation != 'delete'
 GROUP BY id
 ```
 
+> Esta tabela é particionada por `DATE(ingestiondatetime)`, o que permite melhorar a performance de leitura e reduzir os custos nas consultas analíticas.
+>
 > Como padrão, utilizamos `MAX_BY(campo, timestamp)` para reconstruir o estado completo do registro quando os eventos são parciais. Isso garante que cada campo traga o valor mais recente, mesmo que as atualizações venham em diferentes momentos e com apenas parte dos dados.
 
 ### Gold
@@ -208,9 +211,6 @@ Representa dados prontos para consumo por ferramentas de BI, como o **Looker Stu
 | `problema_oficina`      | STRING    | Nome da oficina associada ao problema            |
 | `problema_oficina_contato` | STRING | Contato da oficina para encaminhamento           |
 | `problema_horario`      | TIMESTAMP | Horário em que o problema foi registrado         |
-
-> Esta tabela é gerada uma vez ao dia. Ela utiliza como fonte as tabelas `staging.motoristas`, `staging.problemas_motoristas` e `staging.problemas`.
-
 
 ```sql
 config {
@@ -240,10 +240,7 @@ FROM problemas_motoristas AS pm
 LEFT JOIN staging.motoristas AS m ON pm.id_motorista = m.id
 LEFT JOIN staging.problemas AS p ON pm.id_problema = p.id
 ```
-
-> Essa tabela permite a geração de relatórios de atendimento aos motoristas com base em problemas recentes.
->
-> Uma sugestão legal seria criar uma Cloud Run que envia o alerta por WhatsApp ao motorista. Ela estaria conectada ao BigQuery e, ao final de sua execução, seria chamada, disparando a mensagem.
+> Tabela re-gerada uma vez ao dia, mas poderiamos trabalhar com casos de carga incremental afim de ter o histórico dos dados (estratégia de carga a partir do max counter da última ingestão).
 
 
 
@@ -270,7 +267,7 @@ Os dados da camada `staging` e `gold` também podem ser utilizados como insumo p
 
 ### Custos
 
-- Embora não seja uma ferramenta de fácil uso, a Google disponibiliza uma [calculadora](https://cloud.google.com/products/calculator) para auxiliar com relação aos custos.
+- Embora não seja uma ferramenta de fácil uso, a Google disponibiliza uma [calculadora](https://cloud.google.com/products/calculator) para auxiliar com relação aos custos. Também é possível mensurar consultando a documentação de cada um dos recursos utilizados.
 
 ### Sofisticação
 
@@ -280,9 +277,9 @@ Os dados da camada `staging` e `gold` também podem ser utilizados como insumo p
 
 ### Adaptações
 
-- Na etapa 2, caso não hajam uma frequência de envio de dados muito alta, o uso da replica no Cloud SQL pode ser deixado de lado.
+- Na etapa 2, caso não haja uma frequência de envio de dados muito alta, o uso da replica no Cloud SQL pode ser deixado de lado.
 
-- As etapas 3 e 4 podem ser removidas, sendo possível enviar dados por meio do [**BigQuery Write API**](https://cloud.google.com/bigquery/docs/write-api).
+- As etapas 3 e 4 podem ser removidas, sendo possível enviar dados por meio do [**BigQuery Write API**](https://cloud.google.com/bigquery/docs/write-api) pela **Cloud Run**.
 
 - A etapa 4 pode ser removida, enviando dados diretamente do **Pub/Sub** para o **BigQuery** ([mais detalhes](https://cloud.google.com/pubsub/docs/bigquery)).
 
