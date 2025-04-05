@@ -267,9 +267,21 @@ Os dados da camada `staging` e `gold` também podem ser utilizados como insumo p
 
 ## Notas ✍️
 
+### Passos do dado
+
+- É possível identificar o caminho do dado, desde a request até a inserção no **BigQuery**, na camada `raw` por meio do `auditid`.
+  
+- É possível identificar dados que foram enviados ao **Pub/Sub** e chegaram até a camada `raw` do **BigQuey**.
+
+- Os horários em que cada passo ocorreu também podem ser acompanhados pelo momento do envio da requisição `timestamp`, instante em que ele passa pelo **Pub/Sub** `publishtime` e horário em que são inseridos nas camadas do **BigQuery** por meio do `ingestiondatetime`.
+
+- O histórico de cada evento pode ser armazenado por um determinado período de tempo e, posteriormente, para diminuição de custos, uma **Scheduled Query** pode ser executada para consolidar e manter apenas a última versão do dado, tanto na camada `raw` quanto na camada `staging` do **BigQuery**.
+
 ### Custos
 
 - Embora não seja uma ferramenta de fácil uso, a Google disponibiliza uma [calculadora](https://cloud.google.com/products/calculator) para auxiliar com relação aos custos. Também é possível mensurar consultando a documentação de cada um dos recursos utilizados.
+
+- Análises mais específicas também ajudam a reduzir custos. Por exemplo, entender se os dados serão armazenados em storage físico ou lógico no BigQuery ([mais detalhes](https://cloud.google.com/bigquery/pricing?hl=pt-br#storage)).
 
 ### Sofisticação
 
