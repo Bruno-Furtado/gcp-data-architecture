@@ -144,6 +144,8 @@ No [**BigQuery**](https://cloud.google.com/bigquery), os eventos processados pel
 > As tabelas são particionadas por data, no caso `DATE(timestamp)` e podem ser clusterizadas por `id` e `operation` para melhorar o desempenho nas consultas.
 >
 > Eventos inválidos ou malformados são armazenados em tabelas espelhadas no dataset `raw_errors`, com a mesma estrutura da `raw`.
+>
+> Esta etapa também pode realizar o processo de consolidação do dado periodicamente, afim de manter apenas a última versão do mesmo, diminuindo custos.
 
 
 
