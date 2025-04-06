@@ -197,7 +197,6 @@ SELECT
   MAX_BY(operation, timestamp) AS lastoperation,
   CURRENT_TIMESTAMP() AS ingestiondatetime
 FROM raw.viagens
-WHERE operation != 'delete'
 GROUP BY id
 ```
 
