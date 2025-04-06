@@ -233,7 +233,7 @@ WITH problemas_motoristas AS (
     id_motorista,
     horario
   FROM staging.problemas_motoristas
-  WHERE horario >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+  WHERE horario >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR) and operation <> 'delete'
 )
 
 SELECT
