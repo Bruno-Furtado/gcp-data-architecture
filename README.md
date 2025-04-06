@@ -199,7 +199,6 @@ SELECT
   MAX_BY(operation, timestamp) AS lastoperation,
   CURRENT_TIMESTAMP() AS ingestiondatetime
 FROM raw.trips
-WHERE operation != 'delete'
 GROUP BY id
 ```
 
@@ -236,7 +235,7 @@ WITH recent_issues AS (
     driver_id,
     issue_timestamp
   FROM staging.driver_issues
-  WHERE issue_timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+  WHERE issue_timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR) and operation <> 'delete'
 )
 
 SELECT
